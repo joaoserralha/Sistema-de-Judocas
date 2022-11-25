@@ -1,9 +1,9 @@
 package use_cases.aluno;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Date;
 import java.util.List;
@@ -19,6 +19,7 @@ import main.java.model.beans.Endereco;
 import main.java.model.beans.Entidade;
 import main.java.model.beans.Filiado;
 import main.java.model.beans.Professor;
+import main.java.model.beans.Rg;
 import main.java.model.dao.DAO;
 import main.java.model.dao.DAOImpl;
 import main.java.util.DatabaseManager;
@@ -43,6 +44,10 @@ public class AtualizarAlunoTest {
         f1.setCpf("861.516.060-00");
         f1.setDataNascimento(new Date());
         f1.setDataCadastro(new Date());
+        f1.setTelefone1("(86)1233-4555");
+        f1.setEmail("johndoe@mail.com");
+        var rg1 = new Rg("531112224", "SSP");
+        f1.setRg(rg1);
         f1.setId(1332L);
 
         endereco = new Endereco();
@@ -58,6 +63,10 @@ public class AtualizarAlunoTest {
         filiadoProf.setDataNascimento(new Date());
         filiadoProf.setDataCadastro(new Date());
         filiadoProf.setId(3332L);
+        filiadoProf.setEmail("digory@mail.com");
+        filiadoProf.setTelefone1("(86)1233-4522");
+        var rg2 = new Rg("531112224", "SSP");
+        filiadoProf.setRg(rg2);
         filiadoProf.setEndereco(endereco);
 
         professor = new Professor();
@@ -77,6 +86,7 @@ public class AtualizarAlunoTest {
 
         view = new AppViewMock();
         facade = view.facade;
+
         clearDatabase();
     }
 
@@ -148,43 +158,35 @@ public class AtualizarAlunoTest {
 
         alunoEncontrado.setFiliado(filiado);
 
-        // Atualizando com os dados inválidos
-        facade.alunoBO.updateAluno(alunoEncontrado);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.alunoBO.updateAluno(alunoEncontrado);
+        });
 
-        var alunoAtualizado = facade.alunoBO.listAll().get(0);
-        var updatedEmail = alunoAtualizado.getFiliado().getEmail();
-
-        assertNotEquals(invalidEmail, updatedEmail);
         assertEquals("Ocorreu um erro ao salvar os dados do aluno."
-                + " Verifique se todos os dados foram preenchidos corretamente!", view.exceptionMessage);
+                + " Verifique se todos os dados foram preenchidos corretamente!", thrown.getMessage());
         clearDatabase();
     }
 
     @Test
     public void UpdateStudentWithEmptyData() throws Exception {
         facade.alunoBO.createAluno(aluno);
-
+        var invalidEmail = "";
         // buscando usuario
-        var alunoEncontrado = (facade.alunoBO.searchAluno(aluno)).get(0);
+        var alunoEncontrado = alunoDao.list().get(0);
 
         // Criando o objeto com os dados atualizados
         var filiado = aluno.getFiliado();
-        filiado.setEmail("");
-        filiado.setNome("");
+        filiado.setEmail(invalidEmail);
 
         alunoEncontrado.setFiliado(filiado);
 
-        // Atualizando com os dados inválidos
-        facade.alunoBO.updateAluno(alunoEncontrado);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.alunoBO.updateAluno(alunoEncontrado);
+        });
 
-        var alunoAtualizado = facade.alunoBO.listAll().get(0);
-        var updatedEmail = alunoAtualizado.getFiliado().getEmail();
-        var updatedName = alunoAtualizado.getFiliado().getNome();
-
-        assertNotEquals("", updatedEmail);
-        assertNotEquals("", updatedName);
         assertEquals("Ocorreu um erro ao salvar os dados do aluno."
-                + " Verifique se todos os dados foram preenchidos corretamente!", view.exceptionMessage);
+                + " Verifique se todos os dados foram preenchidos corretamente!", thrown.getMessage());
+        clearDatabase();
         clearDatabase();
     }
 
