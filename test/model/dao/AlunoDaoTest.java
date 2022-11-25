@@ -150,7 +150,6 @@ public class AlunoDaoTest {
 	@AfterClass
 	public static void closeDatabase() {
 		clearDatabase();
-		DatabaseManager.close();
 	}
 
 }

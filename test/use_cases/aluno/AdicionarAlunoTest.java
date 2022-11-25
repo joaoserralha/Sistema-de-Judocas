@@ -21,7 +21,6 @@ import main.java.model.beans.Professor;
 import main.java.model.dao.DAO;
 import main.java.model.dao.DAOImpl;
 import main.java.util.DatabaseManager;
-import main.java.view.AppView;
 
 public class AdicionarAlunoTest {
 
@@ -32,6 +31,8 @@ public class AdicionarAlunoTest {
     private static Filiado f1;
     private static Filiado filiadoProf;
     private static Professor professor;
+    private static AppViewMock view;
+    private static FacadeMock facade;
 
     @BeforeClass
     public static void setUp() {
@@ -72,6 +73,9 @@ public class AdicionarAlunoTest {
         aluno.setEntidade(entidade);
 
         alunoDao = new DAOImpl<Aluno>(Aluno.class);
+
+        view = new AppViewMock();
+        facade = view.facade;
     }
 
     public static void clearDatabase() {
@@ -84,10 +88,6 @@ public class AdicionarAlunoTest {
 
     @Test
     public void createValidStudent() throws Exception {
-        clearDatabase();
-
-        AppViewMock view = new AppViewMock();
-        FacadeMock facade = view.facade;
 
         facade.alunoBO.createAluno(aluno);
         var result = facade.alunoBO.listAll();
@@ -96,12 +96,56 @@ public class AdicionarAlunoTest {
 
         assertNotNull(result);
         assertNull(message);
-    }
-
-    @AfterClass
-    public static void closeDatabase() {
         clearDatabase();
-        DatabaseManager.close();
     }
 
+    @Test
+    public void createStudentWithInvalidFields() throws Exception {
+
+        var f = new Filiado();
+        f.setNome("John Doe");
+        f.setCpf("861.516.060");
+        f.setEmail("@mail");
+        f.setDataNascimento(new Date());
+        f.setDataCadastro(new Date());
+        f.setId(1332L);
+
+        var alunoInvalido = aluno;
+        alunoInvalido.setFiliado(f);
+
+        facade.alunoBO.createAluno(alunoInvalido);
+        var result = facade.alunoBO.listAll();
+
+        var message = view.exceptionMessage;
+
+        assertNotNull(result);
+        assertEquals("Ocorreu um erro ao cadastrar o aluno!"
+                + " Verifique se todos os dados foram preenchidos corretamente.", message);
+        clearDatabase();
+    }
+
+    @Test
+    public void createStudentWithMissingFields() throws Exception {
+
+        var f = new Filiado();
+        f.setNome(null);
+        f.setCpf(null);
+        f.setEmail(null);
+        f.setDataNascimento(null);
+        f.setDataCadastro(null);
+        f.setId(1332L);
+
+        var alunoInvalido = aluno;
+        alunoInvalido.setFiliado(f);
+
+        facade.alunoBO.createAluno(alunoInvalido);
+        var result = facade.alunoBO.listAll();
+
+        var message = view.exceptionMessage;
+
+        assertNotNull(result);
+        assertEquals("Ocorreu um erro ao cadastrar o aluno!"
+                + " Verifique se todos os dados foram preenchidos corretamente.", message);
+        clearDatabase();
+    }
 }
