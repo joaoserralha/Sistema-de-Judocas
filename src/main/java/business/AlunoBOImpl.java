@@ -32,7 +32,7 @@ public class AlunoBOImpl implements AlunoBO {
 					+ " Verifique se todos os dados foram preenchidos corretamente.");
 		} catch (Exception e) {
 			e.printStackTrace();
-			throw new Exception("Desculpe, ocorreu um erro desconhecido ao salvar o aluno.");
+			throw new Exception(e.getMessage());
 		}
 	}
 

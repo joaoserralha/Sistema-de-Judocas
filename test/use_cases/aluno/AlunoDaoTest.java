@@ -1,4 +1,4 @@
-package model.dao;
+package use_cases.aluno;
 
 import static org.junit.Assert.assertEquals;
 
