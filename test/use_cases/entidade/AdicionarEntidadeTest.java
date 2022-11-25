@@ -119,7 +119,7 @@ public class AdicionarEntidadeTest {
     }
 
     @Test
-    public void createEntitiyWithInvalidFields() throws Exception {
+    public void createEntityWithInvalidFields() throws Exception {
 
         var entidadeInvalida = entidade;
 
@@ -138,7 +138,7 @@ public class AdicionarEntidadeTest {
     }
 
     @Test
-    public void createStudentWithMissingFields() throws Exception {
+    public void createEntityWithMissingFields() throws Exception {
 
         var entidadeInvalida = entidade;
 
