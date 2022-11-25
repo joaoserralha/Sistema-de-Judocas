@@ -1,16 +1,14 @@
 package mocks;
 
-import net.java.dev.genesis.annotation.Form;
 import main.java.facade.AppFacade;
 import main.java.view.AppView;
 
-@Form
 public class AppViewMock implements AppView {
     public FacadeMock facade;
     public String exceptionMessage;
 
     public AppViewMock() {
-        facade = new FacadeMock();
+        facade = new FacadeMock(this);
     }
 
     @Override

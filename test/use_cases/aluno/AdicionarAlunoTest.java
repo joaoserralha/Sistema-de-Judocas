@@ -2,6 +2,7 @@ package use_cases.aluno;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 import java.util.Date;
 import java.util.List;
@@ -85,13 +86,16 @@ public class AdicionarAlunoTest {
     public void createValidStudent() throws Exception {
         clearDatabase();
 
-        AppViewMock app = new AppViewMock();
-        FacadeMock facade = app.facade;
+        AppViewMock view = new AppViewMock();
+        FacadeMock facade = view.facade;
 
         facade.alunoBO.createAluno(aluno);
         var result = facade.alunoBO.listAll();
 
+        var message = view.exceptionMessage;
+
         assertNotNull(result);
+        assertNull(message);
     }
 
     @AfterClass

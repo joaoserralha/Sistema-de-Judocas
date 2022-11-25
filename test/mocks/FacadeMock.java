@@ -1,6 +1,5 @@
 package mocks;
 
-import javax.swing.JOptionPane;
 import net.java.dev.genesis.annotation.Form;
 import main.java.business.AlunoBO;
 import main.java.business.AlunoBOImpl;
@@ -12,19 +11,18 @@ import main.java.business.ProfessorEntidadeBO;
 import main.java.business.ProfessorEntidadeBOImpl;
 import main.java.facade.AppFacade;
 import main.java.view.AppView;
-import main.java.view.MainAppView;
-import main.java.view.gui.MainAppFrame;
 
 @Form
 public class FacadeMock implements AppView {
 
-    private AppView view = new MainAppView();
+    private AppView view;
     public AlunoBO alunoBO;
     public ProfessorBO professorBO;
     public EntidadeBO entidadeBO;
     public ProfessorEntidadeBO professorEntidadeBO;
 
-    public FacadeMock() {
+    public FacadeMock(AppView view) {
+        this.view = view;
         this.alunoBO = new AlunoBOImpl(this.view);
         this.professorBO = new ProfessorBOImpl(this.view);
         this.entidadeBO = new EntidadeBOImpl(this.view);
