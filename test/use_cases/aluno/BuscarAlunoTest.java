@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 import java.util.Date;
 import java.util.List;
@@ -23,7 +24,7 @@ import main.java.model.dao.DAO;
 import main.java.model.dao.DAOImpl;
 import main.java.util.DatabaseManager;
 
-public class AtualizarAlunoTest {
+public class BuscarAlunoTest {
 
     private static DAO<Aluno> alunoDao;
     private static Aluno aluno;
@@ -89,102 +90,37 @@ public class AtualizarAlunoTest {
     }
 
     @Test
-    public void updateStudent() throws Exception {
-        facade.alunoBO.createAluno(aluno);
-
-        var alunoEncontrado = alunoDao.list().get(0);
-
-        // criando o objeto com os dados atualizados
-        var filiado = aluno.getFiliado();
-        filiado.setEmail("johnDnew@mail.com");
-
-        alunoEncontrado.setFiliado(filiado);
-
-        var alunoAtualizado = facade.alunoBO.listAll().get(0);
-        var updatedEmail = alunoAtualizado.getFiliado().getEmail();
-        assertEquals(updatedEmail, "johnDnew@mail.com");
-        clearDatabase();
-    }
-
-    @Test
-    public void findByNameAndUpdateStudent() throws Exception {
+    public void findByName() throws Exception {
         facade.alunoBO.createAluno(aluno);
 
         // Buscando aluno por nome
         Filiado filiadoBusca = new Filiado();
-
         filiadoBusca.setNome("John Doe");
 
         Aluno alunoBusca = new Aluno();
         alunoBusca.setFiliado(filiadoBusca);
+
         var alunoEncontrado = facade.alunoBO.searchAluno(alunoBusca).get(0);
 
-        // Ccriando o objeto com os dados atualizados
-        var filiado = aluno.getFiliado();
-        filiado.setEmail("johnDnew@mail.com");
-
-        alunoEncontrado.setFiliado(filiado);
-
-        // Atualizando
-        facade.alunoBO.updateAluno(alunoEncontrado);
-
-        var alunoAtualizado = facade.alunoBO.listAll().get(0);
-        var updatedEmail = alunoAtualizado.getFiliado().getEmail();
-        assertEquals(updatedEmail, "johnDnew@mail.com");
+        assertEquals(aluno, alunoEncontrado);
         clearDatabase();
     }
 
     @Test
-    public void updateStudentWithInvalidData() throws Exception {
-        facade.alunoBO.createAluno(aluno);
-        var invalidEmail = "mail.com";
-
-        // buscando usuario
-        var alunoEncontrado = alunoDao.list().get(0);
-
-        // Criando o objeto com os dados atualizados
-        var filiado = aluno.getFiliado();
-        filiado.setEmail(invalidEmail);
-
-        alunoEncontrado.setFiliado(filiado);
-
-        // Atualizando com os dados inválidos
-        facade.alunoBO.updateAluno(alunoEncontrado);
-
-        var alunoAtualizado = facade.alunoBO.listAll().get(0);
-        var updatedEmail = alunoAtualizado.getFiliado().getEmail();
-
-        assertNotEquals(invalidEmail, updatedEmail);
-        assertEquals("Ocorreu um erro ao salvar os dados do aluno."
-                + " Verifique se todos os dados foram preenchidos corretamente!", view.exceptionMessage);
-        clearDatabase();
-    }
-
-    @Test
-    public void UpdateStudentWithEmptyData() throws Exception {
+    public void searchNonexistent() throws Exception {
         facade.alunoBO.createAluno(aluno);
 
-        // buscando usuario
-        var alunoEncontrado = (facade.alunoBO.searchAluno(aluno)).get(0);
+        // Buscando aluno por nome
+        Filiado filiadoBusca = new Filiado();
+        filiadoBusca.setNome("Bob");
 
-        // Criando o objeto com os dados atualizados
-        var filiado = aluno.getFiliado();
-        filiado.setEmail("");
-        filiado.setNome("");
+        Aluno alunoBusca = new Aluno();
+        alunoBusca.setFiliado(filiadoBusca);
 
-        alunoEncontrado.setFiliado(filiado);
+        var listaAlunos = facade.alunoBO.searchAluno(alunoBusca);
 
-        // Atualizando com os dados inválidos
-        facade.alunoBO.updateAluno(alunoEncontrado);
-
-        var alunoAtualizado = facade.alunoBO.listAll().get(0);
-        var updatedEmail = alunoAtualizado.getFiliado().getEmail();
-        var updatedName = alunoAtualizado.getFiliado().getNome();
-
-        assertNotEquals("", updatedEmail);
-        assertNotEquals("", updatedName);
-        assertEquals("Ocorreu um erro ao salvar os dados do aluno."
-                + " Verifique se todos os dados foram preenchidos corretamente!", view.exceptionMessage);
+        // lista deve ser vazia
+        assertTrue(listaAlunos.isEmpty());
         clearDatabase();
     }
 

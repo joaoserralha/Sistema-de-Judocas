@@ -148,4 +148,9 @@ public class AdicionarAlunoTest {
                 + " Verifique se todos os dados foram preenchidos corretamente.", message);
         clearDatabase();
     }
+
+    @AfterClass
+    public static void closeDatabase() {
+        clearDatabase();
+    }
 }
