@@ -1,9 +1,7 @@
 package use_cases.aluno;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Date;
 import java.util.List;
@@ -19,6 +17,7 @@ import main.java.model.beans.Endereco;
 import main.java.model.beans.Entidade;
 import main.java.model.beans.Filiado;
 import main.java.model.beans.Professor;
+import main.java.model.beans.Rg;
 import main.java.model.dao.DAO;
 import main.java.model.dao.DAOImpl;
 import main.java.util.DatabaseManager;
@@ -26,6 +25,8 @@ import main.java.util.DatabaseManager;
 public class AtualizarAlunoTest {
 
     private static DAO<Aluno> alunoDao;
+    private static DAO<Professor> professorDao;
+    private static DAO<Entidade> entidadeDao;
     private static Aluno aluno;
     private static Entidade entidade;
     private static Endereco endereco;
@@ -41,8 +42,12 @@ public class AtualizarAlunoTest {
         f1 = new Filiado();
         f1.setNome("John Doe");
         f1.setCpf("861.516.060-00");
+        f1.setEmail("johndoe@mail.com");
         f1.setDataNascimento(new Date());
         f1.setDataCadastro(new Date());
+        f1.setTelefone1("(86)1233-4555");
+        var rg1 = new Rg("531112224", "SSP");
+        f1.setRg(rg1);
         f1.setId(1332L);
 
         endereco = new Endereco();
@@ -58,6 +63,8 @@ public class AtualizarAlunoTest {
         filiadoProf.setDataNascimento(new Date());
         filiadoProf.setDataCadastro(new Date());
         filiadoProf.setId(3332L);
+        var rg2 = new Rg("531112224", "SSP");
+        filiadoProf.setRg(rg2);
         filiadoProf.setEndereco(endereco);
 
         professor = new Professor();
@@ -74,22 +81,43 @@ public class AtualizarAlunoTest {
         aluno.setEntidade(entidade);
 
         alunoDao = new DAOImpl<Aluno>(Aluno.class);
+        professorDao = new DAOImpl<Professor>(Professor.class);
+        entidadeDao = new DAOImpl<Entidade>(Entidade.class);
 
         view = new AppViewMock();
         facade = view.facade;
         clearDatabase();
     }
 
+    public static void resetTemplateObject() {
+        aluno.getFiliado().setEmail("johndoe@mail.com");
+        aluno.getFiliado().setCpf("861.516.060-00");
+        aluno.getFiliado().setTelefone1("(86)1233-4555");
+    }
+
     public static void clearDatabase() {
-        List<Aluno> all = alunoDao.list();
-        for (Aluno each : all) {
+        List<Aluno> allStudents = alunoDao.list();
+        for (Aluno each : allStudents) {
             alunoDao.delete(each);
+        }
+        assertEquals(0, alunoDao.list().size());
+
+        List<Professor> allTeachers = professorDao.list();
+        for (Professor each : allTeachers) {
+            professorDao.delete(each);
+        }
+        assertEquals(0, alunoDao.list().size());
+
+        List<Entidade> allEntities = entidadeDao.list();
+        for (Entidade each : allEntities) {
+            entidadeDao.delete(each);
         }
         assertEquals(0, alunoDao.list().size());
     }
 
     @Test
     public void updateStudent() throws Exception {
+        resetTemplateObject();
         facade.alunoBO.createAluno(aluno);
 
         var alunoEncontrado = alunoDao.list().get(0);
@@ -108,18 +136,18 @@ public class AtualizarAlunoTest {
 
     @Test
     public void findByNameAndUpdateStudent() throws Exception {
+        resetTemplateObject();
         facade.alunoBO.createAluno(aluno);
 
         // Buscando aluno por nome
         Filiado filiadoBusca = new Filiado();
-
         filiadoBusca.setNome("John Doe");
 
         Aluno alunoBusca = new Aluno();
         alunoBusca.setFiliado(filiadoBusca);
         var alunoEncontrado = facade.alunoBO.searchAluno(alunoBusca).get(0);
 
-        // Ccriando o objeto com os dados atualizados
+        // Criando o objeto com os dados atualizados
         var filiado = aluno.getFiliado();
         filiado.setEmail("johnDnew@mail.com");
 
@@ -136,11 +164,20 @@ public class AtualizarAlunoTest {
 
     @Test
     public void updateStudentWithInvalidData() throws Exception {
+        resetTemplateObject();
         facade.alunoBO.createAluno(aluno);
         var invalidEmail = "mail.com";
 
-        // buscando usuario
-        var alunoEncontrado = alunoDao.list().get(0);
+        // Buscando aluno por nome
+        Filiado filiadoBusca = new Filiado();
+        filiadoBusca.setNome("John Doe");
+
+        // Buscando aluno por nome
+        Aluno alunoBusca = new Aluno();
+        alunoBusca.setFiliado(filiadoBusca);
+
+        List<Aluno> entidades = facade.alunoBO.searchAluno(alunoBusca);
+        var alunoEncontrado = entidades.get(0);
 
         // Criando o objeto com os dados atualizados
         var filiado = aluno.getFiliado();
@@ -148,43 +185,43 @@ public class AtualizarAlunoTest {
 
         alunoEncontrado.setFiliado(filiado);
 
-        // Atualizando com os dados inválidos
-        facade.alunoBO.updateAluno(alunoEncontrado);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.alunoBO.updateAluno(alunoEncontrado);
+        });
 
-        var alunoAtualizado = facade.alunoBO.listAll().get(0);
-        var updatedEmail = alunoAtualizado.getFiliado().getEmail();
-
-        assertNotEquals(invalidEmail, updatedEmail);
         assertEquals("Ocorreu um erro ao salvar os dados do aluno."
-                + " Verifique se todos os dados foram preenchidos corretamente!", view.exceptionMessage);
+                + " Verifique se todos os dados foram preenchidos corretamente!", thrown.getMessage());
         clearDatabase();
     }
 
     @Test
     public void UpdateStudentWithEmptyData() throws Exception {
+        resetTemplateObject();
         facade.alunoBO.createAluno(aluno);
+        var invalidEmail = "";
 
-        // buscando usuario
-        var alunoEncontrado = (facade.alunoBO.searchAluno(aluno)).get(0);
+        // Buscando aluno por nome
+        Filiado filiadoBusca = new Filiado();
+        filiadoBusca.setNome("John Doe");
+
+        Aluno alunoBusca = new Aluno();
+        alunoBusca.setFiliado(filiadoBusca);
+
+        List<Aluno> entidades = facade.alunoBO.searchAluno(alunoBusca);
+        var alunoEncontrado = entidades.get(0);
 
         // Criando o objeto com os dados atualizados
         var filiado = aluno.getFiliado();
-        filiado.setEmail("");
-        filiado.setNome("");
+        filiado.setEmail(invalidEmail);
 
         alunoEncontrado.setFiliado(filiado);
 
-        // Atualizando com os dados inválidos
-        facade.alunoBO.updateAluno(alunoEncontrado);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.alunoBO.updateAluno(alunoEncontrado);
+        });
 
-        var alunoAtualizado = facade.alunoBO.listAll().get(0);
-        var updatedEmail = alunoAtualizado.getFiliado().getEmail();
-        var updatedName = alunoAtualizado.getFiliado().getNome();
-
-        assertNotEquals("", updatedEmail);
-        assertNotEquals("", updatedName);
         assertEquals("Ocorreu um erro ao salvar os dados do aluno."
-                + " Verifique se todos os dados foram preenchidos corretamente!", view.exceptionMessage);
+                + " Verifique se todos os dados foram preenchidos corretamente!", thrown.getMessage());
         clearDatabase();
     }
 

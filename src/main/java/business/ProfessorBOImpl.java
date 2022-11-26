@@ -5,13 +5,14 @@ import java.util.List;
 import main.java.model.beans.Professor;
 import main.java.model.dao.DAO;
 import main.java.model.dao.DAOImpl;
+import main.java.model.validator.ProfessorValidator;
 import main.java.util.FiliadoID;
 import main.java.view.AppView;
 
 public class ProfessorBOImpl implements ProfessorBO {
-
+	private static ProfessorValidator validator = new ProfessorValidator();
 	private AppView view;
-	private static DAO<Professor> dao = new DAOImpl<Professor>(Professor.class);
+	private static DAO<Professor> dao = new DAOImpl<Professor>(Professor.class, validator, false);
 
 	public ProfessorBOImpl(AppView view) {
 		this.view = view;

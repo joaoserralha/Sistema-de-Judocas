@@ -5,12 +5,13 @@ import java.util.List;
 import main.java.model.beans.Entidade;
 import main.java.model.dao.DAO;
 import main.java.model.dao.DAOImpl;
+import main.java.model.validator.EntidadeValidator;
 import main.java.view.AppView;
 
 public class EntidadeBOImpl implements EntidadeBO {
-
+	private static EntidadeValidator validator = new EntidadeValidator();
 	private AppView view;
-	private static DAO<Entidade> dao = new DAOImpl<Entidade>(Entidade.class);
+	private static DAO<Entidade> dao = new DAOImpl<Entidade>(Entidade.class, validator, false);
 
 	public EntidadeBOImpl(AppView view) {
 		this.view = view;
