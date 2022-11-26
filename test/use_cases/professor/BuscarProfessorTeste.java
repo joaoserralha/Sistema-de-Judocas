@@ -29,7 +29,8 @@ import main.java.util.DatabaseManager;
 
 public class BuscarProfessorTeste {
     private static DAO<Aluno> alunoDao;
-	private static DAO<Professor> profDAO;
+    private static DAO<Professor> profDAO;
+    private static DAO<Entidade> entidadeDao;
     private static Aluno aluno;
     private static Entidade entidade;
     private static Endereco endereco;
@@ -38,87 +39,92 @@ public class BuscarProfessorTeste {
     private static Professor professor;
     private static AppViewMock view;
     private static FacadeMock facade;
-	private static Rg rg;
 
-	
-	@BeforeClass
-	public static void setUp(){
-		DatabaseManager.setEnviroment(DatabaseManager.TEST);
-		endereco = new Endereco();
+    @BeforeClass
+    public static void setUp() {
+        DatabaseManager.setEnviroment(DatabaseManager.TEST);
+
+        f1 = new Filiado();
+        f1.setNome("John Doe");
+        f1.setCpf("861.516.060-00");
+        f1.setEmail("johndoe@mail.com");
+        f1.setDataNascimento(new Date());
+        f1.setDataCadastro(new Date());
+        f1.setTelefone1("(86)1233-4555");
+        var rg1 = new Rg("531112224", "SSP");
+        f1.setRg(rg1);
+        f1.setId(1332L);
+
+        endereco = new Endereco();
         endereco.setBairro("Rudge");
         endereco.setCep("64078-213");
         endereco.setCidade("Teresina");
         endereco.setEstado("PI");
         endereco.setRua("Rua Des. Berilo Mota");
 
-		rg = new Rg();
-		rg.setNumero("54645271-4");
-		rg.setOrgaoExpedidor("SP");
-
-		f1 = new Filiado();
-        f1.setNome("John Doe");
-        f1.setCpf("861.516.060-00");
-        f1.setDataNascimento(new Date());
-        f1.setDataCadastro(new Date());
-        f1.setId(1332L);
-		f1.setRg(rg);
-		f1.setEndereco(endereco);
-		f1.setTelefone1("+5511982832150");
-
-		
-		filiadoProf = new Filiado();
+        filiadoProf = new Filiado();
         filiadoProf.setNome("Digory");
         filiadoProf.setCpf("036.464.453-27");
         filiadoProf.setDataNascimento(new Date());
         filiadoProf.setDataCadastro(new Date());
         filiadoProf.setId(3332L);
+        filiadoProf.setRegistroCbj("34561");
+        filiadoProf.setEmail("digory@mail.com");
+        filiadoProf.setTelefone1("(86)3333-4444");
+        var rg2 = new Rg("531112224", "SSP");
+        filiadoProf.setRg(rg2);
         filiadoProf.setEndereco(endereco);
-		filiadoProf.setRegistroCbj("34561");
-		filiadoProf.setRg(rg);
-		filiadoProf.setEndereco(endereco);
-		filiadoProf.setTelefone1("+5511982832150");
-		
-		professor = new Professor();
-		professor.setFiliado(filiadoProf);
-		
-		entidade = new Entidade();
+
+        professor = new Professor();
+        professor.setFiliado(filiadoProf);
+
+        entidade = new Entidade();
         entidade.setEndereco(endereco);
         entidade.setNome("Academia 1");
         entidade.setTelefone1("(086)1234-5432");
 
+        aluno = new Aluno();
+        aluno.setFiliado(f1);
+        aluno.setProfessor(professor);
+        aluno.setEntidade(entidade);
 
-		aluno = new Aluno();
-		aluno.setFiliado(f1);
-		aluno.setProfessor(professor);
-		aluno.setEntidade(entidade);
-		
-		alunoDao = new DAOImpl<Aluno>(Aluno.class);
-		profDAO= new DAOImpl<Professor>(Professor.class);
+        alunoDao = new DAOImpl<Aluno>(Aluno.class);
+        profDAO = new DAOImpl<Professor>(Professor.class);
+        entidadeDao = new DAOImpl<Entidade>(Entidade.class);
 
         view = new AppViewMock();
         facade = view.facade;
+        clearDatabase();
     }
 
-	
-	public static void clearDatabase() {
-        List<Aluno> all = alunoDao.list();
-        for (Aluno each : all) {
+    public static void clearDatabase() {
+        List<Aluno> allStudents = alunoDao.list();
+        for (Aluno each : allStudents) {
             alunoDao.delete(each);
         }
-        List<Professor> professores = profDAO.list();
-		for (Professor each : professores) {
+        assertEquals(0, alunoDao.list().size());
+
+        List<Professor> allTeachers = profDAO.list();
+        for (Professor each : allTeachers) {
             profDAO.delete(each);
         }
+        assertEquals(0, alunoDao.list().size());
+
+        List<Entidade> allEntities = entidadeDao.list();
+        for (Entidade each : allEntities) {
+            entidadeDao.delete(each);
+        }
+        assertEquals(0, alunoDao.list().size());
     }
 
-	@Test
-	public void clearDatabaseTest() {
-		clearDatabase();
+    @Test
+    public void clearDatabaseTest() {
+        clearDatabase();
         List<Aluno> all = alunoDao.list();
         List<Professor> professores = profDAO.list();
-		
+
         assertEquals(0, all.size());
-		assertEquals(0, professores.size());
+        assertEquals(0, professores.size());
     }
 
     @Test
@@ -157,5 +163,5 @@ public class BuscarProfessorTeste {
     public static void closeDatabase() {
         clearDatabase();
     }
-    
+
 }

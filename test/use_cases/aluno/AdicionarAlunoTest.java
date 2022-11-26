@@ -1,8 +1,7 @@
 package use_cases.aluno;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Date;
 import java.util.List;
@@ -18,6 +17,7 @@ import main.java.model.beans.Endereco;
 import main.java.model.beans.Entidade;
 import main.java.model.beans.Filiado;
 import main.java.model.beans.Professor;
+import main.java.model.beans.Rg;
 import main.java.model.dao.DAO;
 import main.java.model.dao.DAOImpl;
 import main.java.util.DatabaseManager;
@@ -25,6 +25,8 @@ import main.java.util.DatabaseManager;
 public class AdicionarAlunoTest {
 
     private static DAO<Aluno> alunoDao;
+    private static DAO<Professor> professorDao;
+    private static DAO<Entidade> entidadeDao;
     private static Aluno aluno;
     private static Entidade entidade;
     private static Endereco endereco;
@@ -40,8 +42,12 @@ public class AdicionarAlunoTest {
         f1 = new Filiado();
         f1.setNome("John Doe");
         f1.setCpf("861.516.060-00");
+        f1.setEmail("johndoe@mail.com");
         f1.setDataNascimento(new Date());
         f1.setDataCadastro(new Date());
+        f1.setTelefone1("(86)1233-4555");
+        var rg1 = new Rg("531112224", "SSP");
+        f1.setRg(rg1);
         f1.setId(1332L);
 
         endereco = new Endereco();
@@ -57,6 +63,8 @@ public class AdicionarAlunoTest {
         filiadoProf.setDataNascimento(new Date());
         filiadoProf.setDataCadastro(new Date());
         filiadoProf.setId(3332L);
+        var rg2 = new Rg("531112224", "SSP");
+        filiadoProf.setRg(rg2);
         filiadoProf.setEndereco(endereco);
 
         professor = new Professor();
@@ -73,15 +81,30 @@ public class AdicionarAlunoTest {
         aluno.setEntidade(entidade);
 
         alunoDao = new DAOImpl<Aluno>(Aluno.class);
+        professorDao = new DAOImpl<Professor>(Professor.class);
+        entidadeDao = new DAOImpl<Entidade>(Entidade.class);
 
         view = new AppViewMock();
         facade = view.facade;
+        clearDatabase();
     }
 
     public static void clearDatabase() {
-        List<Aluno> all = alunoDao.list();
-        for (Aluno each : all) {
+        List<Aluno> allStudents = alunoDao.list();
+        for (Aluno each : allStudents) {
             alunoDao.delete(each);
+        }
+        assertEquals(0, alunoDao.list().size());
+
+        List<Professor> allTeachers = professorDao.list();
+        for (Professor each : allTeachers) {
+            professorDao.delete(each);
+        }
+        assertEquals(0, alunoDao.list().size());
+
+        List<Entidade> allEntities = entidadeDao.list();
+        for (Entidade each : allEntities) {
+            entidadeDao.delete(each);
         }
         assertEquals(0, alunoDao.list().size());
     }
@@ -90,12 +113,10 @@ public class AdicionarAlunoTest {
     public void createValidStudent() throws Exception {
 
         facade.alunoBO.createAluno(aluno);
-        var result = facade.alunoBO.listAll();
 
-        var message = view.exceptionMessage;
+        var result = facade.alunoBO.listAll().get(0);
 
-        assertNotNull(result);
-        assertNull(message);
+        assertEquals(aluno.getFiliado().getNome(), result.getFiliado().getNome());
         clearDatabase();
     }
 
@@ -113,14 +134,11 @@ public class AdicionarAlunoTest {
         var alunoInvalido = aluno;
         alunoInvalido.setFiliado(f);
 
-        facade.alunoBO.createAluno(alunoInvalido);
-        var result = facade.alunoBO.listAll();
-
-        var message = view.exceptionMessage;
-
-        assertNotNull(result);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.alunoBO.createAluno(alunoInvalido);
+        });
         assertEquals("Ocorreu um erro ao cadastrar o aluno!"
-                + " Verifique se todos os dados foram preenchidos corretamente.", message);
+                + " Verifique se todos os dados foram preenchidos corretamente.", thrown.getMessage());
         clearDatabase();
     }
 
@@ -138,14 +156,11 @@ public class AdicionarAlunoTest {
         var alunoInvalido = aluno;
         alunoInvalido.setFiliado(f);
 
-        facade.alunoBO.createAluno(alunoInvalido);
-        var result = facade.alunoBO.listAll();
-
-        var message = view.exceptionMessage;
-
-        assertNotNull(result);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.alunoBO.createAluno(alunoInvalido);
+        });
         assertEquals("Ocorreu um erro ao cadastrar o aluno!"
-                + " Verifique se todos os dados foram preenchidos corretamente.", message);
+                + " Verifique se todos os dados foram preenchidos corretamente.", thrown.getMessage());
         clearDatabase();
     }
 

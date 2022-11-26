@@ -42,7 +42,7 @@ public class DAOImpl<E> implements DAO<E> {
 			db.commit();
 			return true;
 		} else {
-			return false;
+			throw new IllegalArgumentException();
 		}
 	}
 

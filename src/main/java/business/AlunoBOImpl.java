@@ -8,8 +8,11 @@ import main.java.model.dao.DAOImpl;
 import main.java.util.FiliadoID;
 import main.java.view.AppView;
 
+import main.java.model.validator.AlunoValidator;
+
 public class AlunoBOImpl implements AlunoBO {
-	private static DAO<Aluno> dao = new DAOImpl<Aluno>(Aluno.class);
+	private static AlunoValidator validator = new AlunoValidator();
+	private static DAO<Aluno> dao = new DAOImpl<Aluno>(Aluno.class, validator, false);
 	private AppView view;
 
 	public AlunoBOImpl(AppView view) {
@@ -42,7 +45,11 @@ public class AlunoBOImpl implements AlunoBO {
 			Aluno old = null;
 			old = dao.get(aluno);
 			if (old != null) {
-				old.copyProperties(aluno);
+				if (validator.validate(aluno)) {
+					old.copyProperties(aluno);
+				} else {
+					throw new IllegalArgumentException();
+				}
 			}
 			fireModelChangeEvent(old);
 		} catch (IllegalArgumentException e) {
