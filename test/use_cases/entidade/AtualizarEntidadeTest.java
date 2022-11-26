@@ -1,7 +1,7 @@
 package use_cases.entidade;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Date;
 import java.util.List;
@@ -104,6 +104,12 @@ public class AtualizarEntidadeTest {
         assertEquals(0, alunoDao.list().size());
     }
 
+    public static void resetTemplateObject() {
+        entidade.setTelefone1("(086)1234-5432");
+        entidade.setCnpj("62.055.474/0001-98");
+        entidade.setNome("JudoPlus");
+    }
+
     @Test
     public void updateEntity() throws Exception {
         facade.entidadeBO.createEntidade(entidade);
@@ -120,6 +126,7 @@ public class AtualizarEntidadeTest {
 
     @Test
     public void findByNameAndUpdateEntity() throws Exception {
+        resetTemplateObject();
         facade.entidadeBO.createEntidade(entidade);
 
         // Buscando entidade por nome
@@ -142,6 +149,7 @@ public class AtualizarEntidadeTest {
 
     @Test
     public void updateEntityWithInvalidData() throws Exception {
+        resetTemplateObject();
         facade.entidadeBO.createEntidade(entidade);
 
         var invalidPhone = "as25145";
@@ -157,19 +165,18 @@ public class AtualizarEntidadeTest {
         entidadeEncontrada.setTelefone1(invalidPhone);
 
         // Atualizando
-        facade.entidadeBO.updateEntidade(entidadeEncontrada);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.entidadeBO.updateEntidade(entidadeEncontrada);
+        });
 
-        var entidadeAtualizada = facade.entidadeBO.listAll().get(0);
-        var updatedPhone = entidadeAtualizada.getTelefone1();
-
-        assertNotEquals(invalidPhone, updatedPhone);
         assertEquals("Ocorreu um erro ao atualizar a entidade!"
-                + " Verifique se todos os dados foram preenchidos corretamente.", view.exceptionMessage);
+                + " Verifique se todos os dados foram preenchidos corretamente.", thrown.getMessage());
         clearDatabase();
     }
 
     @Test
     public void UpdateEntityWithEmptyData() throws Exception {
+        resetTemplateObject();
         facade.entidadeBO.createEntidade(entidade);
 
         // Buscando entidade por nome
@@ -184,16 +191,12 @@ public class AtualizarEntidadeTest {
         entidadeEncontrada.setNome("");
 
         // Atualizando
-        facade.entidadeBO.updateEntidade(entidadeEncontrada);
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.entidadeBO.updateEntidade(entidadeEncontrada);
+        });
 
-        var entidadeAtualizada = facade.entidadeBO.listAll().get(0);
-        var updatedPhone = entidadeAtualizada.getTelefone1();
-        var updatedName = entidadeAtualizada.getNome();
-
-        assertNotEquals("", updatedPhone);
-        assertNotEquals("", updatedName);
         assertEquals("Ocorreu um erro ao atualizar a entidade!"
-                + " Verifique se todos os dados foram preenchidos corretamente.", view.exceptionMessage);
+                + " Verifique se todos os dados foram preenchidos corretamente.", thrown.getMessage());
         clearDatabase();
     }
 

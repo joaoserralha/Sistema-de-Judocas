@@ -1,7 +1,6 @@
 package use_cases.professor;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -9,13 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import junit.framework.Assert;
 import mocks.AppViewMock;
 import mocks.FacadeMock;
 import main.java.model.beans.Aluno;

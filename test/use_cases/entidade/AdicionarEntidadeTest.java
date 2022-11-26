@@ -2,7 +2,7 @@ package use_cases.entidade;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Date;
 import java.util.List;
@@ -107,14 +107,13 @@ public class AdicionarEntidadeTest {
 
     @Test
     public void createValidEntity() throws Exception {
+        entidade.setTelefone1("(086)1234-5432");
+        entidade.setCnpj("62.055.474/0001-98");
 
         facade.entidadeBO.createEntidade(entidade);
         var result = facade.entidadeBO.listAll();
 
-        var message = view.exceptionMessage;
-
         assertNotNull(result);
-        assertNull(message);
         clearDatabase();
     }
 
@@ -126,14 +125,12 @@ public class AdicionarEntidadeTest {
         entidadeInvalida.setCnpj("62055474");
         entidadeInvalida.setTelefone1("as25145");
 
-        facade.entidadeBO.createEntidade(entidadeInvalida);
-        var result = facade.entidadeBO.listAll();
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.entidadeBO.createEntidade(entidadeInvalida);
+        });
 
-        var message = view.exceptionMessage;
-
-        assertNotNull(result);
         assertEquals("Ocorreu um erro ao cadastrar a entidade!"
-                + " Verifique se todos os dados foram preenchidos corretamente.", message);
+                + " Verifique se todos os dados foram preenchidos corretamente.", thrown.getMessage());
         clearDatabase();
     }
 
@@ -145,14 +142,12 @@ public class AdicionarEntidadeTest {
         entidadeInvalida.setCnpj("");
         entidadeInvalida.setTelefone1("");
 
-        facade.entidadeBO.createEntidade(entidadeInvalida);
-        var result = facade.entidadeBO.listAll();
+        IllegalArgumentException thrown = assertThrows(IllegalArgumentException.class, () -> {
+            facade.entidadeBO.createEntidade(entidadeInvalida);
+        });
 
-        var message = view.exceptionMessage;
-
-        assertNotNull(result);
         assertEquals("Ocorreu um erro ao cadastrar a entidade!"
-                + " Verifique se todos os dados foram preenchidos corretamente.", message);
+                + " Verifique se todos os dados foram preenchidos corretamente.", thrown.getMessage());
         clearDatabase();
     }
 
