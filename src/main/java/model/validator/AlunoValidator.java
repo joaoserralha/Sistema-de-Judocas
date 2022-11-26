@@ -5,7 +5,7 @@ import main.java.model.beans.Aluno;
 public class AlunoValidator implements Validator<Aluno> {
 
 	private boolean isPhoneValid(String str) {
-		return str.matches("^\\(?\\d{0,3}\\)?\\s?(\\d{6,9}|\\d{3,5}\\-\\d{3,5})$");
+		return str.matches("^\\(?\\d{2,3}\\)?(\\s)?\\d{4,5}-?\\d{4}$");
 	}
 
 	private boolean isCpfValid(String str) {
@@ -13,7 +13,7 @@ public class AlunoValidator implements Validator<Aluno> {
 	}
 
 	private boolean isEmailValid(String str) {
-		return str.matches("^([a-z0-9]+)@.+.com$");
+		return str.matches("^([a-zA-Z0-9]+)@.+.com$");
 	}
 
 	public boolean validate(Aluno obj) {
@@ -25,7 +25,7 @@ public class AlunoValidator implements Validator<Aluno> {
 		if (aluno.getCpf() == "" || aluno.getCpf() == null || this.isCpfValid(aluno.getCpf()) == false) {
 			return false;
 		}
-		if (aluno.getRg() == null) {
+		if (aluno.getRg().getNumero() == null) {
 			return false;
 		}
 		if (aluno.getEmail() == "" || aluno.getEmail() == null || this.isEmailValid(aluno.getEmail()) == false) {

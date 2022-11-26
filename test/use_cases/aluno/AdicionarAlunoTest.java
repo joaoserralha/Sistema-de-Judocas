@@ -1,8 +1,6 @@
 package use_cases.aluno;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.Date;
@@ -27,6 +25,8 @@ import main.java.util.DatabaseManager;
 public class AdicionarAlunoTest {
 
     private static DAO<Aluno> alunoDao;
+    private static DAO<Professor> professorDao;
+    private static DAO<Entidade> entidadeDao;
     private static Aluno aluno;
     private static Entidade entidade;
     private static Endereco endereco;
@@ -42,6 +42,7 @@ public class AdicionarAlunoTest {
         f1 = new Filiado();
         f1.setNome("John Doe");
         f1.setCpf("861.516.060-00");
+        f1.setEmail("johndoe@mail.com");
         f1.setDataNascimento(new Date());
         f1.setDataCadastro(new Date());
         f1.setTelefone1("(86)1233-4555");
@@ -80,15 +81,30 @@ public class AdicionarAlunoTest {
         aluno.setEntidade(entidade);
 
         alunoDao = new DAOImpl<Aluno>(Aluno.class);
+        professorDao = new DAOImpl<Professor>(Professor.class);
+        entidadeDao = new DAOImpl<Entidade>(Entidade.class);
 
         view = new AppViewMock();
         facade = view.facade;
+        clearDatabase();
     }
 
     public static void clearDatabase() {
-        List<Aluno> all = alunoDao.list();
-        for (Aluno each : all) {
+        List<Aluno> allStudents = alunoDao.list();
+        for (Aluno each : allStudents) {
             alunoDao.delete(each);
+        }
+        assertEquals(0, alunoDao.list().size());
+
+        List<Professor> allTeachers = professorDao.list();
+        for (Professor each : allTeachers) {
+            professorDao.delete(each);
+        }
+        assertEquals(0, alunoDao.list().size());
+
+        List<Entidade> allEntities = entidadeDao.list();
+        for (Entidade each : allEntities) {
+            entidadeDao.delete(each);
         }
         assertEquals(0, alunoDao.list().size());
     }
@@ -97,12 +113,10 @@ public class AdicionarAlunoTest {
     public void createValidStudent() throws Exception {
 
         facade.alunoBO.createAluno(aluno);
-        var result = facade.alunoBO.listAll();
 
-        var message = view.exceptionMessage;
+        var result = facade.alunoBO.listAll().get(0);
 
-        assertNotNull(result);
-        assertNull(message);
+        assertEquals(aluno.getFiliado().getNome(), result.getFiliado().getNome());
         clearDatabase();
     }
 
